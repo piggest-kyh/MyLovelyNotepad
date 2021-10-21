@@ -1,11 +1,8 @@
 package com.piggest.mylovelynotepad.Controller
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
-import android.widget.ListView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -19,61 +16,93 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-//    val note1: Note = Note("first Note", "2021/10/19 \n 18.43", "1")
-//    val note2: Note = Note("Second Note", "2021/10/19 \n 18.47", "2")
-//    val fakeNotes  = listOf<Note>(note1, note2)
-
-    lateinit var adapter: NoteAdapter
-    lateinit var textDir: File
+    //init adapter and file directory
+    private lateinit var adapter: NoteAdapter
+    private lateinit var textDir: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //floating action bar Section
+        // bind button for create new note and add function with init new screen for new note
         val fab = findViewById<FloatingActionButton>(R.id.fab)
 
         fab.setOnClickListener {
-            Intent(this, NoteActivity :: class.java)
-                .putExtra("NewNote", true)
+            Intent(this, NoteActivity::class.java)
+                .putExtra("newNote", true)
                 .apply { startActivity(this) }
         }
 
-         textDir = DataService.getTextDir()
+        // init directory with text files with help of separate func in DataService. Use Separate class because this file is used multiply times in two activities
+        textDir = DataService.getTextDir()
 
+        //check if directory exist and if it is, find all files witch keeping inside of directory
         getTextFilesFromDir(checkIfDirectoryExistsAndCreate(textDir))
 
-        adapter = NoteAdapter(this, DataService.notes)
+        //create an adapter for RecyclerView list and adding on item click lambda expression for complete intent in case of click on specific row
+        // with additional information about item
+        adapter = NoteAdapter(this, DataService.notes) {
+            Intent(this, NoteActivity::class.java)
+                .putExtra("newNote", false)
+                .putExtra("noteName", it.id)
+                .putExtra("noteText", it.noteText)
+                .putExtra("modifiedDate", it.noteDate)
+                .apply { startActivity(this) }
+        }
+
+        //binding RecyclerListView to adapter
         val notesListView = findViewById<RecyclerView>(R.id.notes_list_view)
         notesListView.adapter = adapter
         notesListView.layoutManager = LinearLayoutManager(this)
-        notesListView.setHasFixedSize(true)
     }
 
+    override fun onResume() {
+        super.onResume()
 
-    fun checkIfDirectoryExistsAndCreate(dir: File) : Boolean{
-        if(!dir.exists()){
+        //When list with notes is showed again, all dataset is cleaned and then all information about notes loads again
+        DataService.notes.clear()
+        getTextFilesFromDir(checkIfDirectoryExistsAndCreate(textDir))
+        adapter.notifyDataSetChanged()
+    }
+
+    //Check if directory for notes exist and return true if exists, and return false and create directory if not
+    private fun checkIfDirectoryExistsAndCreate(dir: File): Boolean {
+        if (!dir.exists()) {
             dir.mkdir()
             return false
         }
         return true
     }
 
-    fun getTextFilesFromDir(dirExist: Boolean) {
-        if(dirExist){
-           var noteFilesList = textDir.listFiles()
+    //Check if directory for notes exist and if exists try to load all files from directory an adding it to array in DataService
+    private fun getTextFilesFromDir(dirExist: Boolean) {
+        if (dirExist) {
 
-            noteFilesList.forEach {
+            //tring to find all files and then get files name, modify date and text for creating note object
+            textDir.listFiles()?.forEach {
                 try {
                     val fileName = it.name
+                    print(fileName)
                     val scanner = Scanner(it)
-                    val fileText = scanner.next()
-                    val fileModifiedDate = it.lastModified().toString()
-
+                    val sb: StringBuilder = StringBuilder("")
+                    while (scanner.hasNextLine()) {
+                        sb.append(scanner.nextLine() + "\n")
+                    }
+                    val fileText = sb.toString()
+                    val fileModifiedDate = DataService.convertLongToTime(it.lastModified())
                     val newNote = Note(fileText, fileModifiedDate, fileName)
                     DataService.notes.add(newNote)
                 } catch (e: Exception) {
-                    print(e.localizedMessage)
+                    if (e.localizedMessage != null) {
+                        DataService.printToast(this, e.localizedMessage!!)
+                    } else {
+                        DataService.printToast(this, e.toString())
+                    }
                 }
             }
+            //Sorting all notes in list by date
+            DataService.notes.sortWith(compareByDescending { it.noteDate })
         }
     }
 }
