@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         // init directory with text files with help of separate func in DataService. Use Separate class because this file is used multiply times in two activities
         textDir = DataService.getTextDir()
 
-        //check if directory exist and if it is, find all files witch keeping inside of directory
+        //check if directory exist and if it is, find all files which keeping inside of directory
         getTextFilesFromDir(checkIfDirectoryExistsAndCreate(textDir))
 
         //create an adapter for RecyclerView list and adding on item click lambda expression for complete intent in case of click on specific row
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
     private fun getTextFilesFromDir(dirExist: Boolean) {
         if (dirExist) {
 
-            //tring to find all files and then get files name, modify date and text for creating note object
+            //trying to find all files and then get files name, modify date and text for creating note object
             textDir.listFiles()?.forEach {
                 try {
                     val fileName = it.name
