@@ -22,7 +22,7 @@ class NoteActivity : AppCompatActivity() {
 
 
     lateinit var backButton: ImageButton
-    lateinit var saveButton: Button
+    lateinit var saveButton: ImageButton
     lateinit var deleteButton: ImageButton
     lateinit var noteDate: TextView
     lateinit var fullText: EditText

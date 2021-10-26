@@ -92,6 +92,7 @@ class MainActivity : AppCompatActivity() {
                     while (scanner.hasNextLine()) {
                         sb.append(scanner.nextLine() + "\n")
                     }
+                    sb.setLength(sb.length - 1)
                     val fileText = sb.toString()
                     val fileModifiedDate = DataService.convertLongToTime(it.lastModified())
                     val newNote = Note(fileText, fileModifiedDate, fileName)
