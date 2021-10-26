@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
 
         //create an adapter for RecyclerView list and adding on item click lambda expression for complete intent in case of click on specific row
         // with additional information about item
+        
         adapter = NoteAdapter(this, DataService.notes) {
             Intent(this, NoteActivity::class.java)
                 .putExtra("newNote", false)
@@ -55,6 +56,8 @@ class MainActivity : AppCompatActivity() {
         val notesListView = findViewById<RecyclerView>(R.id.notes_list_view)
         notesListView.adapter = adapter
         notesListView.layoutManager = LinearLayoutManager(this)
+
+        DataService.printToast(this, "Hello world")
     }
 
     override fun onResume() {

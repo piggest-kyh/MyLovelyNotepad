@@ -31,5 +31,4 @@ object DataService {
     fun printToast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).apply { show() }
     }
-
 }
