@@ -24,12 +24,15 @@ class NoteAdapter(val context: Context,val notes: List<Note>, val itemClick: (No
 
             val text = note.noteText
             val headline = if (text.length > 31){
-                text.subSequence(0, 30).toString()
-            } else {
+                text.subSequence(0, 30).toString() + ".."
+            } else if(text.isEmpty()){
+                ".."
+            }
+            else {
                 text
             }
 
-            noteHeadline.text = "$headline.."
+            noteHeadline.text = headline
             noteTime.text = note.noteDate
 
             //added click listener for row with help of lambda expression because recycler view don have inbuilt click listener
